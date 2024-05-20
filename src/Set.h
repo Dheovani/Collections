@@ -9,31 +9,29 @@ class Set : public Collection<_Ty>
     using p_El = std::shared_ptr<_El>;
 
     p_El First, Last;
-    size_t _Size = 0;
+    size_t _Size;
 
 public:
-    Set()
-        : First(nullptr), Last(nullptr), _Size(0)
-    {
-    };
+    Set() : First(nullptr), Last(nullptr), _Size(0)
+    {}
 
     Set(const Collection<_Ty>::_Args& args)
         : First(nullptr), Last(nullptr), _Size(0)
     {
-        AddItems(args);
+        PushAll(args);
     }
 
     Set(const Collection<_Ty> &collection)
         : First(nullptr), Last(nullptr), _Size(0)
     {
         collection.ForEach([&](const _Ty& val) {
-            this->AddItem(val);
+            this->Push(val);
         });
     }
 
     const p_El operator[](const size_t& pos) const
     {
-        p_El item = First;
+        p_El item = this->First;
 
         for (size_t i = 0; i < pos; ++i) {
             if (item == nullptr) {
@@ -45,34 +43,53 @@ public:
         return item;
     }
 
-    bool IsEmpty() const override { return !First && !Last && !_Size; }
+    bool IsEmpty() const override { return !this->First && !this->Last && !this->_Size; }
 
     size_t Size() const override { return _Size; }
 
-    void AddItem(const _Ty& value) override
+    const _Ty Get(const size_t& pos) const override
     {
-        if (Contains(value))
+        return ((*this)[pos])->GetValue();
+    }
+
+    void Sort(bool asc = true) override
+    {
+    }
+
+    void Push(const _Ty& value) override
+    {
+        if (this->Contains(value))
             return;
 
         p_El newItem = std::make_shared<_El>(value);
 
-        if (IsEmpty())
-            Last = (First = newItem);
+        if (this->IsEmpty())
+            this->Last = (this->First = newItem);
         else {
-            Last->SetNext(newItem);
-            Last = newItem;
+            this->Last->SetNext(newItem);
+            this->Last = newItem;
         }
 
-        ++_Size;
+        this->_Size += 1;
     }
 
-    void AddItems(const Collection<_Ty>::_Args& values) override
+    void PushAll(const Collection<_Ty>::_Args& values) override
     {
         for (auto it = std::rend(values) - 1; it >= std::rbegin(values); --it)
-            AddItem(*it);
+            Push(*it);
     }
 
-    bool Contains(const _Ty& value) const
+    void Insert(const _Ty& value, const size_t& pos) override
+    {
+        if (((*this)[pos]) == nullptr || Contains(value))
+            return;
+
+        p_El newItem = std::make_shared<_El>(value);
+        newItem->SetNext(((*this)[pos]));
+        ((*this)[pos - 1])->SetNext(newItem);
+    }
+
+    bool Contains(const _Ty& value) const override
     {
         for (const _Ty& el : *this) {
             if (el == value)
