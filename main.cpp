@@ -16,7 +16,7 @@ int main(void)
 		std::cout << i << std::endl;
 
 	std::cout << "\nLista 2:" << std::endl;
-	List<std::string> list2 = { "Teste1", "Teste2", "Teste3", "Teste4", "Teste5" };
+	List<std::string> list2 = { "Teste5", "Teste1", "Teste4", "Teste2", "Teste3" };
 	list2.ForEach([](const std::string& i) {
 		std::cout << i << std::endl;
 	});

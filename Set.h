@@ -7,7 +7,6 @@ class Set : public Collection<_Ty>
 {
     class _El;
     using p_El = std::shared_ptr<_El>;
-    using _Args = std::initializer_list<_Ty>;
 
     p_El First, Last;
     size_t _Size = 0;
@@ -18,7 +17,7 @@ public:
     {
     };
 
-    Set(const _Args& args)
+    Set(const Collection<_Ty>::_Args& args)
         : First(nullptr), Last(nullptr), _Size(0)
     {
         AddItems(args);
@@ -32,16 +31,16 @@ public:
         });
     }
 
-    p_El operator[](const size_t& pos)
+    const p_El operator[](const size_t& pos) const
     {
-        if (pos > _Size) {
-            return nullptr;
-        }
-
         p_El item = First;
 
-        for (int i = 0; i < pos; ++i)
+        for (size_t i = 0; i < pos; ++i) {
+            if (item == nullptr) {
+                return nullptr;
+            }
             item = item->Next;
+        }
 
         return item;
     }
@@ -67,7 +66,7 @@ public:
         ++_Size;
     }
 
-    void AddItems(const _Args& values) override
+    void AddItems(const Collection<_Ty>::_Args& values) override
     {
         for (auto it = std::rend(values) - 1; it >= std::rbegin(values); --it)
             AddItem(*it);
@@ -153,6 +152,11 @@ private:
         _El() : Next(nullptr) {};
 
         _El(const _Ty& val) : Value(val), Next(nullptr) {}
+
+        operator _Ty () const
+        {
+            return Value;
+        }
 
         _Ty GetValue() { return Value; }
 
