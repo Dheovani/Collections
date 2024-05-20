@@ -3,28 +3,28 @@
 #include "Collection.h"
 
 template <typename _Ty>
-class List : public Collection<_Ty>
+class Set : public Collection<_Ty>
 {
-	class _El;
-	using p_El = std::shared_ptr<_El>;
+    class _El;
+    using p_El = std::shared_ptr<_El>;
     using _Args = std::initializer_list<_Ty>;
 
     p_El First, Last;
-    size_t _Size;
+    size_t _Size = 0;
 
 public:
-    List()
+    Set()
         : First(nullptr), Last(nullptr), _Size(0)
     {
     };
 
-    List(const _Args &args)
+    Set(const _Args& args)
         : First(nullptr), Last(nullptr), _Size(0)
     {
         AddItems(args);
     }
 
-    List(const Collection<_Ty>& collection)
+    Set(const Collection<_Ty> &collection)
         : First(nullptr), Last(nullptr), _Size(0)
     {
         collection.ForEach([&](const _Ty& val) {
@@ -50,8 +50,11 @@ public:
 
     size_t Size() const override { return _Size; }
 
-    void AddItem(const _Ty &value) override
+    void AddItem(const _Ty& value) override
     {
+        if (Contains(value))
+            return;
+
         p_El newItem = std::make_shared<_El>(value);
 
         if (IsEmpty())
@@ -64,7 +67,7 @@ public:
         ++_Size;
     }
 
-    void AddItems(const _Args &values) override
+    void AddItems(const _Args& values) override
     {
         for (auto it = std::rend(values) - 1; it >= std::rbegin(values); --it)
             AddItem(*it);
@@ -141,24 +144,24 @@ public:
     Iterator end() const { return Iterator(nullptr); }
 
 private:
-	class _El
-	{
+    class _El
+    {
         _Ty Value;
         p_El Next;
 
     public:
         _El() : Next(nullptr) {};
 
-        _El(const _Ty &val) : Value(val), Next(nullptr) {}
+        _El(const _Ty& val) : Value(val), Next(nullptr) {}
 
-		_Ty GetValue() { return Value; }
+        _Ty GetValue() { return Value; }
 
-		void SetValue(const _Ty &value) { this->Value = value; }
+        void SetValue(const _Ty& value) { this->Value = value; }
 
         p_El GetNext() { return Next; }
 
-        void SetNext(const p_El &next) { this->Next = next; }
+        void SetNext(const p_El& next) { this->Next = next; }
 
-        friend class List<_Ty>;
-	};
+        friend class Set<_Ty>;
+    };
 };
