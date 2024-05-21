@@ -16,6 +16,7 @@ public:
     virtual ~Collection() = default;
     virtual bool IsEmpty() const = 0;
     virtual size_t Size() const = 0;
+    virtual void _Set(const _Ty&, const size_t&) = 0;
     virtual const _Ty Get(const size_t&) const = 0;
     virtual void Sort(bool) = 0;
     virtual void Push(const _Ty&) = 0;

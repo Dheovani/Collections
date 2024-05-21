@@ -54,6 +54,19 @@ public:
         return ((*this)[pos])->GetValue();
     }
 
+    void _Set(const _Ty& value, const size_t& pos) override
+    {
+        p_El posElm = ((*this)[pos]),
+            prevElm = ((*this)[pos - 1]),
+            newItem = std::make_shared<_El>(value);
+
+        if (posElm == nullptr)
+            return;
+
+        newItem->SetNext(posElm->GetNext());
+        prevElm->SetNext(newItem);
+    }
+
     void Sort(bool asc = true) override
     {
     }
@@ -80,12 +93,15 @@ public:
 
     void Insert(const _Ty& value, const size_t& pos) override
     {
-        if (((*this)[pos]) == nullptr || Contains(value))
+        p_El posElm = ((*this)[pos]),
+            prevElm = ((*this)[pos - 1]),
+            newItem = std::make_shared<_El>(value);
+
+        if (posElm == nullptr)
             return;
 
-        p_El newItem = std::make_shared<_El>(value);
-        newItem->SetNext(((*this)[pos]));
-        ((*this)[pos - 1])->SetNext(newItem);
+        newItem->SetNext(posElm);
+        prevElm->SetNext(newItem);
     }
 
     bool Contains(const _Ty& value) const override

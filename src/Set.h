@@ -1,76 +1,43 @@
 #pragma once
 
-#include "Collection.h"
+#include "List.h"
+#include "Sorter.h"
 
 template <typename _Ty>
-class Set : public Collection<_Ty>
+class Set : public List<_Ty>
 {
-    class _El;
-    using p_El = std::shared_ptr<_El>;
-
-    p_El First, Last;
-    size_t _Size;
-
 public:
-    Set() : First(nullptr), Last(nullptr), _Size(0)
+    Set() : List<_Ty>()
     {}
 
     Set(const Collection<_Ty>::_Args& args)
-        : First(nullptr), Last(nullptr), _Size(0)
+        : List<_Ty>()
     {
         PushAll(args);
     }
 
     Set(const Collection<_Ty> &collection)
-        : First(nullptr), Last(nullptr), _Size(0)
+        : List<_Ty>()
     {
         collection.ForEach([&](const _Ty& val) {
-            this->Push(val);
+            Push(val);
         });
     }
 
-    const p_El operator[](const size_t& pos) const
+    void _Set(const _Ty& value, const size_t& pos) override
     {
-        p_El item = this->First;
+        if (List<_Ty>::Contains(value))
+            return;
 
-        for (size_t i = 0; i < pos; ++i) {
-            if (item == nullptr) {
-                return nullptr;
-            }
-            item = item->Next;
-        }
-
-        return item;
-    }
-
-    bool IsEmpty() const override { return !this->First && !this->Last && !this->_Size; }
-
-    size_t Size() const override { return _Size; }
-
-    const _Ty Get(const size_t& pos) const override
-    {
-        return ((*this)[pos])->GetValue();
-    }
-
-    void Sort(bool asc = true) override
-    {
+        List<_Ty>::_Set(value, pos);
     }
 
     void Push(const _Ty& value) override
     {
-        if (this->Contains(value))
+        if (List<_Ty>::Contains(value))
             return;
 
-        p_El newItem = std::make_shared<_El>(value);
-
-        if (this->IsEmpty())
-            this->Last = (this->First = newItem);
-        else {
-            this->Last->SetNext(newItem);
-            this->Last = newItem;
-        }
-
-        this->_Size += 1;
+        List<_Ty>::Push(value);
     }
 
     void PushAll(const Collection<_Ty>::_Args& values) override
@@ -81,108 +48,9 @@ public:
 
     void Insert(const _Ty& value, const size_t& pos) override
     {
-        if (((*this)[pos]) == nullptr || Contains(value))
+        if (List<_Ty>::Contains(value))
             return;
 
-        p_El newItem = std::make_shared<_El>(value);
-        newItem->SetNext(((*this)[pos]));
-        ((*this)[pos - 1])->SetNext(newItem);
+        List<_Ty>::Insert(value, pos);
     }
-
-    bool Contains(const _Ty& value) const override
-    {
-        for (const _Ty& el : *this) {
-            if (el == value)
-                return true;
-        }
-
-        return false;
-    }
-
-    void ForEach(const std::function<void(const _Ty&)>& callback) const override
-    {
-        if (IsEmpty())
-            return;
-
-        for (const _Ty& el : *this)
-            callback(el);
-    }
-
-    class Iterator
-    {
-    private:
-        p_El current;
-
-    public:
-        Iterator(p_El ptr)
-            : current(ptr)
-        {
-        }
-
-        Iterator& operator++()
-        {
-            if (current)
-                current = current->GetNext();
-
-            return *this;
-        }
-
-        Iterator operator++(int)
-        {
-            Iterator temp = *this;
-            ++(*this);
-
-            return temp;
-        }
-
-        _Ty& operator*()
-        {
-            return current->Value;
-        }
-
-        _Ty* operator->()
-        {
-            return &(current->Value);
-        }
-
-        bool operator==(const Iterator& other) const
-        {
-            return current == other.current;
-        }
-
-        bool operator!=(const Iterator& other) const
-        {
-            return !(*this == other);
-        }
-    };
-
-    Iterator begin() const { return Iterator(First); }
-    Iterator end() const { return Iterator(nullptr); }
-
-private:
-    class _El
-    {
-        _Ty Value;
-        p_El Next;
-
-    public:
-        _El() : Next(nullptr) {};
-
-        _El(const _Ty& val) : Value(val), Next(nullptr) {}
-
-        operator _Ty () const
-        {
-            return Value;
-        }
-
-        _Ty GetValue() { return Value; }
-
-        void SetValue(const _Ty& value) { this->Value = value; }
-
-        p_El GetNext() { return Next; }
-
-        void SetNext(const p_El& next) { this->Next = next; }
-
-        friend class Set<_Ty>;
-    };
 };
