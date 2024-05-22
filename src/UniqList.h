@@ -1,22 +1,21 @@
 #pragma once
 
 #include "List.h"
-#include "Sorter.h"
 
 template <typename _Ty>
-class Set : public List<_Ty>
+class UniqList : public List<_Ty>
 {
 public:
-    Set() : List<_Ty>()
+    UniqList() : List<_Ty>()
     {}
 
-    Set(const Collection<_Ty>::_Args& args)
+    UniqList(const Collection<_Ty>::_Args& args)
         : List<_Ty>()
     {
         PushAll(args);
     }
 
-    Set(const Collection<_Ty> &collection)
+    UniqList(const Collection<_Ty> &collection)
         : List<_Ty>()
     {
         collection.ForEach([&](const _Ty& val) {
@@ -24,12 +23,12 @@ public:
         });
     }
 
-    void _Set(const _Ty& value, const size_t& pos) override
+    void Set(const _Ty& value, const size_t& pos) override
     {
         if (List<_Ty>::Contains(value))
             return;
 
-        List<_Ty>::_Set(value, pos);
+        List<_Ty>::Set(value, pos);
     }
 
     void Push(const _Ty& value) override

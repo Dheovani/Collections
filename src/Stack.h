@@ -3,30 +3,30 @@
 #include "Collection.h"
 
 template <typename _Ty>
-class List : public Collection<_Ty>
+class Stack : public Collection<_Ty>
 {
-	class _El;
-	using p_El = std::shared_ptr<_El>;
+    class _El;
+    using p_El = std::shared_ptr<_El>;
 
-    p_El First, Last;
+    p_El Top;
     size_t _Size;
 
 public:
-    List()
-        : First(nullptr), Last(nullptr), _Size(0)
-    {};
+    Stack()
+        : Top(nullptr), _Size(0)
+    {}
 
-    List(const Collection<_Ty>::_Args &args)
-        : First(nullptr), Last(nullptr), _Size(0)
+    Stack(const Collection<_Ty>::_Args& args)
+        : Top(nullptr), _Size(0)
     {
         PushAll(args);
     }
 
-    List(const Collection<_Ty>& collection)
-        : First(nullptr), Last(nullptr), _Size(0)
+    Stack(const Collection<_Ty>& collection)
+        : Top(nullptr), _Size(0)
     {
         collection.ForEach([&](const _Ty& val) {
-            this->Push(val);
+            Push(val);
         });
     }
 
@@ -36,19 +36,19 @@ public:
             return nullptr;
         }
 
-        p_El item = First;
+        p_El item = Top;
 
-        for (int i = 0; i < pos; ++i)
-            item = item->Next;
+        for (int i = (int)_Size; i > pos; --i)
+            item = item->Previous;
 
         return item;
     }
 
-    bool IsEmpty() const override { return !First && !Last && !_Size; }
+    bool IsEmpty() const override { return Top == nullptr && _Size == 0; }
 
     size_t Size() const override { return _Size; }
 
-    virtual void Set(const _Ty& value, const size_t& pos) override
+    void Set(const _Ty& value, const size_t& pos) override
     {
         p_El posElm = ((*this)[pos]);
 
@@ -61,7 +61,7 @@ public:
     const _Ty Get(const size_t& pos) const override
     {
         const p_El el = ((*this)[pos]);
-        return el != nullptr ? el->GetValue() : _Ty();
+        return el != nullptr ? el->Value : _Ty();
     }
 
     void Delete(const _Ty& value) override
@@ -69,57 +69,55 @@ public:
         for (size_t pos = 0; pos < _Size; ++pos) {
             const p_El elm = ((*this)[pos]);
 
-            if (elm->GetValue() == value) {
+            if (elm->Value == value) {
                 Remove(pos);
                 --pos;
             }
         }
     }
-    
-    virtual void Push(const _Ty &value) override
-    {
-        p_El newItem = std::make_shared<_El>(value);
 
-        if (IsEmpty())
-            Last = (First = newItem);
-        else {
-            Last->SetNext(newItem);
-            Last = newItem;
-        }
+    void Push(const _Ty& value) override
+    {
+        p_El newElm = std::make_shared<_El>(value);
+
+        newElm->SetPrevious(Top);
+        Top = newElm;
 
         ++_Size;
     }
 
-    virtual void PushAll(const Collection<_Ty>::_Args &values) override
+    void PushAll(const Collection<_Ty>::_Args& values) override
     {
         for (auto it = std::rend(values) - 1; it >= std::rbegin(values); --it)
             Push(*it);
     }
 
-    virtual void Insert(const _Ty& value, const size_t& pos) override
+    void Insert(const _Ty& value, const size_t& pos) override
     {
-        p_El posElm = ((*this)[pos]),
-            prevElm = ((*this)[pos - 1]),
-            newItem = std::make_shared<_El>(value);
+        p_El posElm = ((*this)[pos]), newElm = std::make_shared<_El>(value);
 
         if (posElm == nullptr)
             return;
 
-        newItem->SetNext(posElm);
-        prevElm->SetNext(newItem);
+        if (posElm->Previous == nullptr && pos == 0)
+            posElm->SetPrevious(newElm);
+        else {
+            newElm->SetPrevious(posElm->Previous);
+            posElm->SetPrevious(newElm);
+        }
     }
 
     void Remove(const size_t& pos) override
     {
-        p_El posElm = ((*this)[pos]), prevElm = ((*this)[pos - 1]);
+        p_El posElm = ((*this)[pos]), nextElm = ((*this)[pos + 1]);
 
         if (posElm == nullptr)
             return;
 
-        if (prevElm == nullptr && posElm == First && pos == 0)
-            First = posElm->GetNext();
-        else if (prevElm)
-            prevElm->SetNext(posElm->GetNext());
+        if (nextElm == nullptr && posElm == Top)
+            Top = posElm->Previous;
+        else
+            nextElm->SetPrevious(posElm->Previous);
 
         --_Size;
     }
@@ -150,13 +148,12 @@ public:
     public:
         Iterator(p_El ptr)
             : current(ptr)
-        {
-        }
+        {}
 
         Iterator& operator++()
         {
             if (current)
-                current = current->GetNext();
+                current = current->Previous;
 
             return *this;
         }
@@ -190,19 +187,19 @@ public:
         }
     };
 
-    Iterator begin() const { return Iterator(First); }
+    Iterator begin() const { return Iterator(Top); }
     Iterator end() const { return Iterator(nullptr); }
 
 private:
-	class _El
-	{
+    class _El
+    {
         _Ty Value;
-        p_El Next;
+        p_El Previous;
 
     public:
-        _El() : Next(nullptr) {};
+        _El() : Previous(nullptr) {};
 
-        _El(const _Ty &val) : Value(val), Next(nullptr) {}
+        _El(const _Ty& val) : Value(val), Previous(nullptr) {}
 
         operator _Ty () const
         {
@@ -211,22 +208,22 @@ private:
 
         bool operator==(const p_El& other) const
         {
-            return other->GetNext() == Next && other.GetValue() == Value;
+            return other->GetPrevious() == Previous && other.GetValue() == Value;
         }
 
         bool operator==(const _El& other) const
         {
-            return other.Next == Next && other.Value == Value;
+            return other.Previous == Previous && other.Value == Value;
         }
 
-		_Ty GetValue() { return Value; }
+        _Ty GetValue() { return Value; }
 
-		void SetValue(const _Ty &value) { this->Value = value; }
+        void SetValue(const _Ty& value) { this->Value = value; }
 
-        p_El GetNext() { return Next; }
+        p_El GetPrevious() { return Previous; }
 
-        void SetNext(const p_El &next) { this->Next = next; }
+        void SetPrevious(const p_El& previous) { this->Previous = previous; }
 
-        friend class List<_Ty>;
-	};
+        friend class Stack<_Ty>;
+    };
 };
