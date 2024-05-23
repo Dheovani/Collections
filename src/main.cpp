@@ -7,7 +7,10 @@
 
 int main(void)
 {
-	Tree<int> tree;
+	Tree<int> tree = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 };
+	tree.ForEach([](const int& i) {
+		std::cout << i << std::endl;
+	});
 
 	/*std::cout << "Lista:" << std::endl;
 	List<int> list1 = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 };
