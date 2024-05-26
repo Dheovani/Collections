@@ -3,16 +3,18 @@
 
 #include "UniqList.h"
 #include "Stack.h"
-#include "Tree.h"
+#include "AvlTree.h"
+#include "BTree.h"
 
 int main(void)
 {
-	Tree<int> tree = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 };
+	AvlTree<int> tree = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 };
+	tree.Remove(5);
 	tree.ForEach([](const int& i) {
 		std::cout << i << std::endl;
 	});
 
-	/*std::cout << "Lista:" << std::endl;
+	std::cout << "Lista:" << std::endl;
 	List<int> list1 = { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5 };
 	list1.Insert(10, 4);
 	list1.Set(5, 6);
@@ -46,7 +48,7 @@ int main(void)
 	stack.Delete(4);
 	stack.ForEach([](const int& i) {
 		std::cout << i << std::endl;
-	});*/
+	});
 
 	return 0;
 }
