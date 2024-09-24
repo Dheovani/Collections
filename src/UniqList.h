@@ -2,54 +2,55 @@
 
 #include "List.h"
 
-template <typename _Ty>
-class UniqList : public List<_Ty>
+using collections::List, collections::Element, collections::Iterator;
+
+namespace collections
 {
-public:
-    UniqList() : List<_Ty>()
-    {}
-
-    UniqList(const Collection<_Ty>::_Args& args)
-        : List<_Ty>()
+    template <typename _Ty, class _El = Element<_Ty>, class _It = Iterator<_Ty>>
+    class UniqList : public List<_Ty, _El, _It>
     {
-        PushAll(args);
-    }
+    public:
+        UniqList() : List<_Ty>()
+        {}
 
-    UniqList(const Collection<_Ty> &collection)
-        : List<_Ty>()
-    {
-        collection.ForEach([&](const _Ty& val) {
-            Push(val);
-        });
-    }
+        UniqList(const Collection<_Ty>::_Args& args) : List<_Ty>()
+        {
+            PushAll(args);
+        }
 
-    void Set(const _Ty& value, const size_t& pos) override
-    {
-        if (List<_Ty>::Contains(value))
-            return;
+        UniqList(const Collection<_Ty>& collection) : List<_Ty>()
+        {
+            collection.ForEach([&](const _Ty& val) { Push(val); });
+        }
 
-        List<_Ty>::Set(value, pos);
-    }
+        void Set(const _Ty& value, const size_t& pos) override
+        {
+            if (List<_Ty>::Contains(value))
+                return;
 
-    void Push(const _Ty& value) override
-    {
-        if (List<_Ty>::Contains(value))
-            return;
+            List<_Ty>::Set(value, pos);
+        }
 
-        List<_Ty>::Push(value);
-    }
+        void Push(const _Ty& value) override
+        {
+            if (List<_Ty>::Contains(value))
+                return;
 
-    void PushAll(const Collection<_Ty>::_Args& values) override
-    {
-        for (auto it = std::rend(values) - 1; it >= std::rbegin(values); --it)
-            Push(*it);
-    }
+            List<_Ty>::Push(value);
+        }
 
-    void Insert(const _Ty& value, const size_t& pos) override
-    {
-        if (List<_Ty>::Contains(value))
-            return;
+        void PushAll(const Collection<_Ty>::_Args& values) override
+        {
+            for (auto it = std::rend(values) - 1; it >= std::rbegin(values); --it)
+                Push(*it);
+        }
 
-        List<_Ty>::Insert(value, pos);
-    }
-};
+        void Insert(const _Ty& value, const size_t& pos) override
+        {
+            if (List<_Ty>::Contains(value))
+                return;
+
+            List<_Ty>::Insert(value, pos);
+        }
+    };
+}

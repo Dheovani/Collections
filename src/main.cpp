@@ -4,7 +4,9 @@
 #include "UniqList.h"
 #include "Stack.h"
 #include "AvlTree.h"
-#include "BTree.h"
+#include "Tree.h"
+
+using namespace collections;
 
 int main(void)
 {
